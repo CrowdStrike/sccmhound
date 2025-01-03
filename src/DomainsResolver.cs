@@ -22,61 +22,76 @@ namespace SCCMHound.src
         {
             foreach (User user in users)
             {
-                if (!domainAlreadyResolved((string)user.Properties["domainsid"]))
+                try
                 {
-                    Domain domainObj = new Domain
+                    if (!domainAlreadyResolved((string)user.Properties["domainsid"]))
                     {
-                        ObjectIdentifier = (string)user.Properties["domainsid"],
-                    };
+                        Domain domainObj = new Domain
+                        {
+                            ObjectIdentifier = (string)user.Properties["domainsid"],
+                        };
 
-                    domainObj.Properties["name"] = user.Properties["domain"];
-                    domainObj.Properties["domain"] = user.Properties["domain"];
-                    domainObj.Properties["domainsid"] = user.Properties["domainsid"];
-                    domainObj.Properties["highvalue"] = true;
-                    domainObj.Properties["distinguishedname"] = $"DC={((string)user.Properties["distinguishedname"]).Substring(((string)user.Properties["distinguishedname"]).IndexOf("DC=") + 3)}".ToUpper();
+                        domainObj.Properties["name"] = user.Properties["domain"];
+                        domainObj.Properties["domain"] = user.Properties["domain"];
+                        domainObj.Properties["domainsid"] = user.Properties["domainsid"];
+                        domainObj.Properties["highvalue"] = true;
+                        domainObj.Properties["distinguishedname"] = $"DC={((string)user.Properties["distinguishedname"]).Substring(((string)user.Properties["distinguishedname"]).IndexOf("DC=") + 3)}".ToUpper();
 
-                    domains.Add(domainObj);
+                        domains.Add(domainObj);
+                    }
                 }
+                catch (KeyNotFoundException e) { } // Prevent exception bubbling up when a User object does not contain a required attribute
+                
             }
             Debug.Print("Resolved domains from users");
 
             foreach (ComputerExt computer in computers)
             {
-                if (!domainAlreadyResolved((string)computer.Properties["domainsid"]))
+                try
                 {
-                    Domain domainObj = new Domain
+                    if (!domainAlreadyResolved((string)computer.Properties["domainsid"]))
                     {
-                        ObjectIdentifier = (string)computer.Properties["domainsid"],
-                    };
+                        Domain domainObj = new Domain
+                        {
+                            ObjectIdentifier = (string)computer.Properties["domainsid"],
+                        };
 
-                    domainObj.Properties["name"] = computer.Properties["domain"];
-                    domainObj.Properties["domain"] = computer.Properties["domain"];
-                    domainObj.Properties["domainsid"] = computer.Properties["domainsid"];
-                    domainObj.Properties["highvalue"] = true;
-                    domainObj.Properties["distinguishedname"] = $"DC={((string)computer.Properties["distinguishedname"]).Substring(((string)computer.Properties["distinguishedname"]).IndexOf("DC=") + 3)}".ToUpper();
+                        domainObj.Properties["name"] = computer.Properties["domain"];
+                        domainObj.Properties["domain"] = computer.Properties["domain"];
+                        domainObj.Properties["domainsid"] = computer.Properties["domainsid"];
+                        domainObj.Properties["highvalue"] = true;
+                        domainObj.Properties["distinguishedname"] = $"DC={((string)computer.Properties["distinguishedname"]).Substring(((string)computer.Properties["distinguishedname"]).IndexOf("DC=") + 3)}".ToUpper();
 
-                    domains.Add(domainObj);
+                        domains.Add(domainObj);
+                    }
                 }
+                catch (KeyNotFoundException e) { } // Prevent exception bubbling up when a Computer object does not contain a required attribute
+
             }
             Debug.Print("Resolved domains from computers");
 
             foreach (Group group in groups)
             {
-                if (!domainAlreadyResolved((string)group.Properties["domainsid"]))
+                try
                 {
-                    Domain domainObj = new Domain
+                    if (!domainAlreadyResolved((string)group.Properties["domainsid"]))
                     {
-                        ObjectIdentifier = (string)group.Properties["domainsid"],
-                    };
+                        Domain domainObj = new Domain
+                        {
+                            ObjectIdentifier = (string)group.Properties["domainsid"],
+                        };
 
-                    domainObj.Properties["name"] = group.Properties["domain"];
-                    domainObj.Properties["domain"] = group.Properties["domain"];
-                    domainObj.Properties["domainsid"] = group.Properties["domainsid"];
-                    domainObj.Properties["highvalue"] = true;
-                    domainObj.Properties["distinguishedname"] = string.Join(",", ((string)group.Properties["domain"]).Split('.').Select(part => $"DC={part.ToUpper()}"));
+                        domainObj.Properties["name"] = group.Properties["domain"];
+                        domainObj.Properties["domain"] = group.Properties["domain"];
+                        domainObj.Properties["domainsid"] = group.Properties["domainsid"];
+                        domainObj.Properties["highvalue"] = true;
+                        domainObj.Properties["distinguishedname"] = string.Join(",", ((string)group.Properties["domain"]).Split('.').Select(part => $"DC={part.ToUpper()}"));
 
-                    domains.Add(domainObj);
+                        domains.Add(domainObj);
+                    }
                 }
+                catch (KeyNotFoundException e) { } // Prevent exception bubbling up when a Group object does not contain a required attribute
+
             }
             Debug.Print("Resolved domains from groups");
 
