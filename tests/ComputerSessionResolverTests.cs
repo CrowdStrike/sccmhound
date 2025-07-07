@@ -18,8 +18,9 @@ namespace SCCMHound.tests
             List<ComputerExt> computers = SCCMCollectorTests.DeserializeComputers();
             List<User> users = SCCMCollectorTests.DeserializeUsers();
             List<UserMachineRelationship> relationships = SCCMCollectorTests.DeserializeRelationships();
+            List<Domain> domains = null;
 
-            ComputerSessionsResolver compSessResolver = new ComputerSessionsResolver(computers, users, relationships, false);
+            ComputerSessionsResolver compSessResolver = new ComputerSessionsResolver(computers, users, relationships, false, domains);
 
             foreach (ComputerSessions compSessions in compSessResolver.computerSessionsList)
             {

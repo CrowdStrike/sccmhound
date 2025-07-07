@@ -3,6 +3,7 @@ using SharpHoundCommonLib.OutputTypes;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.DirectoryServices.ActiveDirectory;
 using System.Linq;
 using System.Management;
 using System.Text;
@@ -22,7 +23,7 @@ namespace SCCMHound.src
             Debug.Print($"{computerSessionsList.Count} sessions were enumerated.");
         }
 
-        public ComputerSessionsResolver(List<ComputerExt> computers, List<User> users, List<UserMachineRelationship> relationships, Boolean addUnresolvedSessionsToSessions)
+        public ComputerSessionsResolver(List<ComputerExt> computers, List<User> users, List<UserMachineRelationship> relationships, Boolean addUnresolvedSessionsToSessions, List<SharpHoundCommonLib.OutputTypes.Domain> domains)
         {
             this.computerLookupByResourceName = HelperUtilities.createLookupTableComputers(computers);
             this.userLookupByUniqueUserName = HelperUtilities.createLookupTableUsers(users);
@@ -61,7 +62,30 @@ namespace SCCMHound.src
                         computerSessions.AddSessionUser(recordUser);
                     }
                     // if the user is not in the lookup table - make dummy user and add
-                    else if (addUnresolvedSessionsToSessions)
+                    else
+                    {
+                        string recordUsername = relationship.uniqueUserName.ToLower();
+                        string name = "";
+                        string domain = "";
+                        string[] tokens = recordUsername.Split('\\');
+                        if (tokens.Length == 2)
+                        {
+                            name = tokens[1];
+                            domain = tokens[0];
+                        }
+                        else
+                        {
+                            name = recordUsername;
+                        }
+
+                        domain = HelperUtilities.lookupNetbiosReturnFQDN(domain, domains);
+                        ;
+                        User user = UserFactory.CreateUser($"{name}@{domain}".ToUpper(), domain, domains);
+                        users.Add(user);
+                        userLookupByUniqueUserName.Add(relationship.uniqueUserName.ToLower(), user);
+                        computerSessions.AddSessionUser(user);
+                    }
+                    //else if (addUnresolvedSessionsToSessions)
                     {
                         // I dont like this. TODO: Remove
                         /*
@@ -78,8 +102,11 @@ namespace SCCMHound.src
                         
                     }
                     // else, add user to sccmUnresolvableSessions
+                    /*
                     else
                     {
+
+
                         if (!computer.Properties.ContainsKey("sccmUnresolvableSessions"))
                         {
                             computer.Properties["sccmUnresolvableSessions"] = new List<string>(); // container for user sessions that dont have corresponding SCCM users
@@ -89,6 +116,7 @@ namespace SCCMHound.src
 
                         
                     }
+                    */
                     
 
                     

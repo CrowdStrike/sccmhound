@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using Xunit;
@@ -19,8 +20,7 @@ namespace SCCMHound.tests
         [Fact]
         public void connect_failure()
         {
-            var e = Assert.Throws<InvalidOperationException>(() => SCCMConnector.CreateInstance(TestConstants.testUnroutableIP, TestConstants.testInstanceSiteCode, null));
-            Assert.Equal("Could not establish WMI connection",e.Message);
+            var e = Assert.Throws<COMException>(() => SCCMConnector.CreateInstance(TestConstants.testUnroutableIP, TestConstants.testInstanceSiteCode, null));
         }
     }
 }

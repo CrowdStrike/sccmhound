@@ -273,7 +273,7 @@ namespace SCCMHound
                 try
                 {
                     Console.WriteLine("Resolving sessions from collected objects...");
-                    ComputerSessionsResolver compSessResolver = new ComputerSessionsResolver(computers, users, relationships, false);
+                    ComputerSessionsResolver compSessResolver = new ComputerSessionsResolver(computers, users, relationships, false, domains);
                     compSessResolver.printSessions();
                 }
                 catch (Exception e)
@@ -292,8 +292,13 @@ namespace SCCMHound
                         //AdminServiceConnector connector = AdminServiceConnector.CreateInstance(sccmServer, sccmConnectorOptions);
                         AdminServiceCollector collector = new AdminServiceCollector(adminServiceConnector);
                         List<LocalAdmin> localAdmins = collector.GetAdministrators();
-                        LocalAdminsResolver localAdminsResolver = new LocalAdminsResolver(computers, groups, users, localAdmins);
+                        LocalAdminsResolver localAdminsResolver = new LocalAdminsResolver(computers, groups, users, localAdmins, domains);
                         
+                    }
+                    catch (UnauthorizedAccessException e)
+                    {
+                        Console.WriteLine(e.ToString());
+                        return;
                     }
                     catch (Exception e)
                     {
@@ -311,8 +316,13 @@ namespace SCCMHound
                         //AdminServiceConnector connector = AdminServiceConnector.CreateInstance(sccmServer, sccmConnectorOptions);
                         AdminServiceCollector collector = new AdminServiceCollector(adminServiceConnector);
                         List<UserMachineRelationship> relationshipsCMPivot = collector.GetUsers();
-                        ComputerSessionsResolver compSessResolver = new ComputerSessionsResolver(computers, users, relationshipsCMPivot, false);
+                        ComputerSessionsResolver compSessResolver = new ComputerSessionsResolver(computers, users, relationshipsCMPivot, false, domains);
 
+                    }
+                    catch (UnauthorizedAccessException e)
+                    {
+                        Console.WriteLine(e.ToString());
+                        return;
                     }
                     catch (Exception e)
                     {
@@ -354,7 +364,7 @@ namespace SCCMHound
                         relationships = sccmCollector.QueryUserMachineRelationships();
 
                         Console.WriteLine("Resolving sessions from collected objects...");
-                        ComputerSessionsResolver compSessResolver = new ComputerSessionsResolver(computers, users, relationships, false);
+                        ComputerSessionsResolver compSessResolver = new ComputerSessionsResolver(computers, users, relationships, false, domains);
 
                         compSessResolver.printSessions();
 
@@ -366,8 +376,13 @@ namespace SCCMHound
                                 //AdminServiceConnector connector = AdminServiceConnector.CreateInstance(sccmServer, sccmConnectorOptions);
                                 AdminServiceCollector collector = new AdminServiceCollector(adminServiceConnector);
                                 List<UserMachineRelationship> relationshipsCMPivot = collector.GetUsers();
-                                compSessResolver = new ComputerSessionsResolver(computers, users, relationshipsCMPivot, false);
+                                compSessResolver = new ComputerSessionsResolver(computers, users, relationshipsCMPivot, false, domains);
 
+                            }
+                            catch (UnauthorizedAccessException e)
+                            {
+                                Console.WriteLine(e.ToString());
+                                return;
                             }
                             catch (Exception e)
                             {
@@ -410,6 +425,21 @@ namespace SCCMHound
             {
                 Console.WriteLine("SCCM connector could not be established.");
                 return;
+            }
+
+            // Clean up LDAP connections before exiting
+            try
+            {
+                Console.WriteLine("Cleaning up any LDAP connections...");
+                LdapConnectionManager.Instance.Cleanup();
+            }
+            catch (Exception e)
+            {
+                if (verbose)
+                {
+                    Console.WriteLine("An error occurred while cleaning up LDAP connections:");
+                    Console.WriteLine(e.ToString());
+                }
             }
 
             Console.WriteLine("Hound out!");

@@ -86,7 +86,7 @@ namespace SCCMHound.tests
             try
             {
                 Console.WriteLine("resolving sessions...");
-                ComputerSessionsResolver compSessResolver = new ComputerSessionsResolver(computers, users, relationships, false);
+                ComputerSessionsResolver compSessResolver = new ComputerSessionsResolver(computers, users, relationships, false, domains);
 
                 compSessResolver.printSessions();
             }
@@ -102,7 +102,7 @@ namespace SCCMHound.tests
             Console.WriteLine("Collecting local administrators...");
             try
             {
-                LocalAdminsResolver localAdminsResolver = new LocalAdminsResolver(computers, groups, users, localAdmins);
+                LocalAdminsResolver localAdminsResolver = new LocalAdminsResolver(computers, groups, users, localAdmins, domains);
 
             }
             catch (Exception e)
@@ -118,7 +118,7 @@ namespace SCCMHound.tests
             try
             {
                     
-                ComputerSessionsResolver compSessResolver = new ComputerSessionsResolver(computers, users, relationshipsCMPivot, false);
+                ComputerSessionsResolver compSessResolver = new ComputerSessionsResolver(computers, users, relationshipsCMPivot, false, domains);
 
             }
             catch (Exception e)

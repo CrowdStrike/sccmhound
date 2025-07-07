@@ -403,18 +403,19 @@ namespace SCCMHound.src
 
         private string getPropertyFromManagementObject(ManagementObject mObj, string query) 
         {
-            string result;
+            string result = "";
 
             try
             {
-                result = mObj[query].ToString();
+                if (mObj[query] != null)
+                {
+                    result = mObj[query].ToString();
+                }
+                
             }
-            // TODO: replace with specific exception handlers
             catch (Exception ex)
             {
                 Debug.Print("Could not retreive property");
-                //Debug.Print(ex.ToString());
-                result = "";
             }
 
             return result;
@@ -442,10 +443,44 @@ namespace SCCMHound.src
                         
 
                         string domain = getPropertyFromManagementObject(mObj, "FullDomainName");
-                        if (!domain.Equals("")) compObj.Properties.Add("domain", domain.ToUpper()); //BloodHound capitalizes these names
+                        if (!domain.Equals(""))
+                        {
+                            compObj.Properties.Add("domain", domain.ToUpper());
+                        }
+                        else
+                        {
+                            string dn = getPropertyFromManagementObject(mObj, "DistinguishedName");
+                            if (!dn.Equals("")) {
+                                domain = HelperUtilities.ConvertLdapToDomain(dn);
+                                compObj.Properties.Add("domain", domain.ToUpper());
+                            }
+                            else
+                            {
+                                string resourceName = ((string[])getPropertyObjectFromManagementObject(mObj, "ResourceNames"))[0];
+                                string netbiosName = getPropertyFromManagementObject(mObj, "NetbiosName");
+
+                                if ((!resourceName.Equals("")) && (!netbiosName.Equals(""))) {
+                                    domain = HelperUtilities.GetDomainFromResource(resourceName, netbiosName);
+                                    if (!domain.Equals(""))
+                                    {
+                                        compObj.Properties.Add("domain", domain.ToUpper());
+                                    }
+                                    else
+                                    {
+                                        Console.WriteLine($"Unable to resolve domains for {resourceName}");
+
+                                    }
+                                }
+                                else
+                                {
+                                    Console.WriteLine($"Unable to resolve domains for {resourceName}");
+                                }
+                            }
+                        }//BloodHound capitalizes these names
 
                         string name = getPropertyFromManagementObject(mObj, "Name");
                         if (!name.Equals("")) compObj.Properties.Add("name", String.Format("{0}.{1}",name,domain).ToUpper()); // BloodHound capitalizes these names
+                        // Need to add else to populate domain if doesnt find it
 
                         string distinguishedname = getPropertyFromManagementObject(mObj, "DistinguishedName");
                         if (!distinguishedname.Equals("")) compObj.Properties.Add("distinguishedname", distinguishedname);
@@ -499,6 +534,9 @@ namespace SCCMHound.src
 
                         string[] sccmSystemRoles = (string[])getPropertyObjectFromManagementObject(mObj, "SystemRoles");
                         if (!sccmSystemRoles.Equals("")) compObj.Properties.Add("sccmSystemRoles", sccmSystemRoles);
+
+                        string[] sccmResourceNames = (string[])getPropertyObjectFromManagementObject(mObj, "ResourceNames");
+                        if (!sccmResourceNames.Equals("")) compObj.Properties.Add("sccmResourceNames", sccmResourceNames);
 
                         string sccmUserAccountControl = getPropertyFromManagementObject(mObj, "UserAccountControl");
                         if (!sccmUserAccountControl.Equals("")) compObj.Properties.Add("sccmUserAccountControl", sccmUserAccountControl);

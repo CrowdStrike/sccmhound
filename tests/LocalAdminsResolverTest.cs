@@ -20,7 +20,9 @@ namespace SCCMHound.tests
             List<User> users = SCCMCollectorTests.DeserializeUsers();
             List<Group> groups = SCCMCollectorTests.DeserializeGroups();
             List<LocalAdmin> localAdmins = AdminServiceCollectorTests.DeserializeLocalAdmins();
-            LocalAdminsResolver localAdminsResolver = new LocalAdminsResolver(computers, groups, users, localAdmins);
+            List<Domain> domains = null;
+
+            LocalAdminsResolver localAdminsResolver = new LocalAdminsResolver(computers, groups, users, localAdmins, domains);
 
             foreach (ComputerExt computer in computers)
             {
