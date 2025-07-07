@@ -60,6 +60,10 @@ namespace SCCMHound
 
                 return Int32.Parse((string)jsonObject["OperationId"]);
             }
+            else if (response.StatusCode == System.Net.HttpStatusCode.Forbidden)
+            {
+                return -403;
+            }
             return -1;
 
         }
@@ -110,6 +114,19 @@ namespace SCCMHound
         {
             var relationships = new List<UserMachineRelationship>();
             int job = SubmitCMPivotQuery("User");
+
+            if (job < 0)
+            {
+                if (job == -403)
+                {
+                    throw new UnauthorizedAccessException("You do not have sufficient permissions to create CMPivot jobs");
+                }
+                else
+                {
+                    throw new Exception("An unknown error occured");
+                }
+            }
+
             JToken results = RetrieveCMPivotResult(job, 30, 3); //30 second sleep, 3 matches required to complete 
             foreach (JToken result in results)
             {
@@ -143,6 +160,19 @@ namespace SCCMHound
         {
             var localAdmins = new List<LocalAdmin>();
             int job = SubmitCMPivotQuery("Administrators");
+
+            if (job < 0)
+            {
+                if (job ==  -403)
+                {
+                    throw new UnauthorizedAccessException("You do not have sufficient permissions to create CMPivot jobs");
+                }
+                else
+                {
+                    throw new Exception("An unknown error occured");
+                }
+            }
+
             JToken results = RetrieveCMPivotResult(job, 30, 3);
 
             foreach (JToken result in results)

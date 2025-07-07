@@ -30,7 +30,7 @@ namespace SCCMHound.src
                         {
                             ObjectIdentifier = (string)user.Properties["domainsid"],
                         };
-
+                        domainObj.Properties["netbios"] = user.Properties["sccmUniqueUserName"].ToString().Split('\\')[0];
                         domainObj.Properties["name"] = user.Properties["domain"];
                         domainObj.Properties["domain"] = user.Properties["domain"];
                         domainObj.Properties["domainsid"] = user.Properties["domainsid"];
@@ -55,7 +55,7 @@ namespace SCCMHound.src
                         {
                             ObjectIdentifier = (string)computer.Properties["domainsid"],
                         };
-
+                        domainObj.Properties["netbios"] = computer.Properties["sccmResourceDomainORWorkgroup"];
                         domainObj.Properties["name"] = computer.Properties["domain"];
                         domainObj.Properties["domain"] = computer.Properties["domain"];
                         domainObj.Properties["domainsid"] = computer.Properties["domainsid"];
